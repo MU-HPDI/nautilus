@@ -1,0 +1,23 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: aws-sync
+spec:
+  containers:
+    - name: aws-container
+      image: amazon/aws-cli
+      command: ["sleep", "infinity"]
+      resources:
+        limits:
+          memory: 4Gi
+          cpu: 2
+        requests:
+          memory: 4Gi
+          cpu: 2
+      volumeMounts:
+        - mountPath: /data
+          name: my-pvc # CHANGE THIS TO YOUR PVC
+  volumes:
+    - name: my-pvc
+      persistentVolumeClaim:
+        claimName: my-pvc # CHANGE THIS TO YOUR PVC
