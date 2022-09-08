@@ -44,7 +44,7 @@ RUN mv ./mmclassification-${MMCLS_VERSION} ${BUILD_DIR}/mmclassification
 RUN pip install ${BUILD_DIR}/mmclassification
 
 # create workspace
-RUN mkdir -p /workspace/cgimmd
+RUN mkdir -p /workspace/
 # set entrypint
 WORKDIR /workspace
 # move the mmdetection code
