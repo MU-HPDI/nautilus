@@ -1,0 +1,24 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: pod-name-sso # YOUR POD NAME HERE
+spec:
+  containers:
+    - name: pod-name-sso # YOUR CONTAINER NAME HERE
+      image: ubuntu:20.04
+      command: ["sh", "-c", "echo 'Im a new pod' && sleep infinity"]
+      resources:
+        limits:
+          memory: 12Gi
+          cpu: 2
+        requests:
+          memory: 10Gi
+          cpu: 2
+      volumeMounts:
+        - mountPath: /data
+          name: persistentVolume-name # YOUR PVC NAME HERE
+  volumes:
+    - name: persistentVolume-name # YOUR PVC NAME HERE
+      persistentVolumeClaim:
+        claimName: persistentVolume-name # YOUR PVC NAME HERE
+

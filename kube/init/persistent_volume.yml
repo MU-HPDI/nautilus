@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: your_name
+spec:
+  storageClassName: rook-cephfs	
+  accessModes:
+  - ReadWriteMany
+  resources:
+    requests:
+      storage: 50Gi
