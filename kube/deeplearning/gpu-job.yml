@@ -1,0 +1,89 @@
+# batch/v1 tells it to use the JOB API
+apiVersion: batch/v1
+# we are running a Job, not a Pod
+kind: Job
+
+# set the name of the job
+metadata:
+  name: my-job-name
+
+spec:
+  # how many times should the system
+  # retry before calling it a failure
+  backoffLimit: 0
+  template:
+    spec:
+      # should we restart on failure
+      restartPolicy: Never
+      # what containers will we need
+      containers:
+        # the name of the container
+        - name: mmdet
+          # the image: can be from any pubic facing registry
+          image: my-image
+          # the working dir when the container starts
+          workingDir: /path/to/mydir
+          # should Kube pull it
+          imagePullPolicy: IfNotPresent
+          # we need to expose the port
+          # that will be used for DDP
+          ports:
+            - containerPort: 8880
+          # setting of env variables
+          env:
+            # which interface to use
+            - name: NCCL_SOCKET_IFNAME
+              value: eth0
+            # prints some INFO level
+            # NCCL logs
+            - name: NCCL_DEBUG
+              value: INFO
+          # the command to run when the container starts
+          command: ["python", "-m", "train.py", "./train_cfg.py"]
+          # define the resources for this container
+          resources:
+            # limits - the max given to the container
+            limits:
+              # RAM
+              memory: 64Gi
+              # cores
+              cpu: 32
+              # NVIDIA GPUs
+              nvidia.com/gpu: 4
+            # requests - what we'd like
+            requests:
+              # RAM
+              memory: 64Gi
+              # CPU Cores
+              cpu: 32
+              # GPUs
+              nvidia.com/gpu: 4
+          # what volumes should we mount
+          volumeMounts:
+            # my datasets PVC should mount to /data
+            - mountPath: /data
+              name: my-pvc
+            # IMPORTANT: we need SHM for DDP
+            - mountPath: /dev/shm
+              name: dshm
+      # tell Kube where to find the volumes we want to use
+      volumes:
+        # which PVC is my data
+        - name: my-pvc
+          persistentVolumeClaim:
+            claimName: my-pvc
+        # setup shared memory as a RAM volume
+        - name: dshm
+          emptyDir:
+            medium: Memory
+      # Tell Kube what type of GPUs we want
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+              - matchExpressions:
+                  - key: nvidia.com/gpu.product
+                    operator: In
+                    values:
+                      # asking for 3090s only
+                      - NVIDIA-GeForce-RTX-3090
