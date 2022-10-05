@@ -1,0 +1,27 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: rclone-pod
+spec:
+  containers:
+    - name: rclone-container
+      image: rclone/rclone
+      command: ["sleep", "infinity"]
+      env:
+        - name: RCLONE_CONFIG_NAUTILUS_TYPE
+          value: s3
+        - name: RCLONE_CONFIG_NAUTILUS_ENDPOINT
+          value: http://rook-ceph-rgw-centrals3.rook-central
+        - name: RCLONE_CONFIG_NAUTILUS_PROVIDER
+          value: Other
+        - name: RCLONE_CONFIG_NAUTILUS_ACCESS_KEY_ID
+          value: $RCLONE_CONFIG_NAUTILUS_ACCESS_KEY_ID
+        - name: RCLONE_CONFIG_NAUTILUS_SECRET_ACCESS_KEY
+          value: $RCLONE_CONFIG_NAUTILUS_SECRET_ACCESS_KEY
+      resources:
+        limits:
+          memory: 4Gi
+          cpu: 2
+        requests:
+          memory: 4Gi
+          cpu: 2

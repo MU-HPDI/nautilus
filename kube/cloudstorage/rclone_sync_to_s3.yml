@@ -1,0 +1,69 @@
+# batch/v1 tells it to use the JOB API
+apiVersion: batch/v1
+# we are running a Job, not a Pod
+kind: Job
+
+# set the name of the job
+metadata:
+  name: sync-pvc-to-s3
+
+spec:
+  # how many times should the system
+  # retry before calling it a failure
+  backoffLimit: 0
+  template:
+    spec:
+      # should we restart on failure
+      restartPolicy: Never
+      # what containers will we need
+      containers:
+        # the name of the container
+        - name: rclone-container
+          # the image: can be from any pubic facing registry
+          image: rclone/rclone
+          # the working dir when the container starts
+          workingDir: /data
+          # should Kube pull it
+          imagePullPolicy: IfNotPresent
+          # environment
+          env:
+            - name: RCLONE_CONFIG_NAUTILUS_TYPE
+              value: s3
+            - name: RCLONE_CONFIG_NAUTILUS_ENDPOINT
+              value: http://rook-ceph-rgw-centrals3.rook-central
+            - name: RCLONE_CONFIG_NAUTILUS_PROVIDER
+              value: Other
+            - name: RCLONE_CONFIG_NAUTILUS_ACCESS_KEY_ID
+              value: $RCLONE_CONFIG_NAUTILUS_ACCESS_KEY_ID
+            - name: RCLONE_CONFIG_NAUTILUS_SECRET_ACCESS_KEY
+              value: $RCLONE_CONFIG_NAUTILUS_SECRET_ACCESS_KEY
+          # the command to run when the container starts
+          command:
+            [
+              "rclone",
+              "sync",
+              "--progress",
+              "--copy-links",
+              "--auto-confirm",
+              "--transfers=16",
+              "/data",
+              "nautilus:$NAUTILUS_PVC_NAME",
+            ]
+          # define the resources for this container
+          resources:
+            # limits - the max given to the container
+            limits:
+              memory: 8Gi
+              cpu: 16
+            requests:
+              memory: 8Gi
+              cpu: 16
+          # what volumes should we mount
+          volumeMounts:
+            - mountPath: /data
+              name: $NAUTILUS_PVC_NAME
+      # tell Kube where to find the volumes we want to use
+      volumes:
+        - name: $NAUTILUS_PVC_NAME
+          persistentVolumeClaim:
+            claimName: $NAUTILUS_PVC_NAME
