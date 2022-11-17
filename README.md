@@ -16,4 +16,4 @@ This repository contains:
 * Slides - the slides used for Tutorials on Nautilus at the University of Missouri
 
 ## Getting Started with Nautilus
-For documentation and step by step instructions for creating an account and using Nautilus, see the [Wiki]().
+For documentation and step by step instructions for creating an account and using Nautilus, see the [Wiki](https://github.com/MU-HPDI/nautilus/wiki).
